@@ -22,7 +22,7 @@ Use this skill to generate and apply commit messages that match the observed `wt
 3. Build the message using the style guide:
 - Read [wt1-commit-style.md](references/wt1-commit-style.md).
 - Subject: imperative, first letter uppercase, no trailing period, target <= 50 characters.
-- Body: explain what changed and why; wrap around 72 chars.
+- Body: explain what changed and why in past tense; wrap around 72 chars.
 - Jira footer format: `Jira issue HUB-####`.
 
 4. Jira prompting controls:

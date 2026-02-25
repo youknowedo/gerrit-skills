@@ -4,7 +4,7 @@ Local Codex skills for Gerrit workflows.
 
 ## Included Skills
 
-- `gerrit-commit-message`: Generates and applies commit messages in Gerrit style (imperative subject, wrapped body, Jira footer handling, no manual Gerrit metadata).
+- `gerrit-commit-message`: Generates and applies commit messages in Gerrit style (imperative subject, past-tense wrapped body, Jira footer handling, no manual Gerrit metadata).
 - `gerrit-push-yubikey`: Pushes to `refs/for/master%wip` with YubiKey reminders and optional session topic support.
 - `gerrit-topic-session`: Stores session-scoped Gerrit topics and formats them as push options.
 

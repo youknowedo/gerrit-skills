@@ -27,7 +27,7 @@ Source analyzed: `git log -n 100 --pretty=full` in `wt1`.
 - First paragraph: what changed.
 - Second paragraph (optional): why and impact.
 - Keep lines wrapped around 72 chars.
-- Keep tense present/imperative, consistent with subject.
+- Keep body text in past tense.
 
 ## Footer guidance
 
@@ -53,4 +53,3 @@ Source analyzed: `git log -n 100 --pretty=full` in `wt1`.
 - Subject: `Address fast-xml-parser vulnerability`
   - Body names advisory and mitigation.
   - Includes Jira footer.
-
