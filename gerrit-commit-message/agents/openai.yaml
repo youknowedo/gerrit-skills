@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gerrit Commit Message Writer"
+  short_description: "Generate Gerrit-style commit messages."
+  default_prompt: "Use $gerrit-commit-message to write and apply a commit message for my staged changes."

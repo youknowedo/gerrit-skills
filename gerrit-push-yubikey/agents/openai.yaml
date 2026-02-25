@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gerrit Push with YubiKey"
+  short_description: "Push to Gerrit with YubiKey prompts."
+  default_prompt: "Use $gerrit-push-yubikey to push to refs/for/master%wip and include session topics."

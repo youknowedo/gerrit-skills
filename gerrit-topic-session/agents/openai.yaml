@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gerrit Topic Session"
+  short_description: "Store session topics and append on push."
+  default_prompt: "Use $gerrit-topic-session to set Gerrit topics for this session and include them during push."
