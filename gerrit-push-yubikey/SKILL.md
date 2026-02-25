@@ -9,19 +9,24 @@ Use this skill to perform Gerrit pushes that may require hardware-signing intera
 
 ## Workflow
 
-1. Pre-check repository state:
+1. Confirm this is a Gerrit repository:
+- Run `git remote get-url origin` and verify Gerrit indicators, for example:
+- remote host contains `gerrit`, or SSH port is `29418`, or URL path contains `/gerrit/`.
+- If not Gerrit, stop and use normal `git push` instead of this skill.
+
+2. Pre-check repository state:
 - Run `git status --short`.
 - Confirm there is a commit to push.
 
-2. Optional: set session topics:
+3. Optional: set session topics:
 - Use `$gerrit-topic-session` to store topics for this session.
 
-3. Run the push helper:
+4. Run the push helper:
 - `scripts/push_for_master.sh`
 - This prints clear terminal reminders and sends desktop notifications.
 - If session topics exist, it appends them as `topic=...` push options.
 
-4. YubiKey guidance behavior:
+5. YubiKey guidance behavior:
 - Before push starts, remind user to unlock YubiKey if needed.
 - When push starts, send a notification telling user to touch/click the YubiKey.
 - After push completes, send success/failure notification.
@@ -29,8 +34,8 @@ Use this skill to perform Gerrit pushes that may require hardware-signing intera
 ## Rules
 
 - Base push target is `git push origin HEAD:refs/for/master%wip`.
+- Do not use this skill when `origin` is not a Gerrit remote.
 - If topics exist, append as additional push options.
 - Do not force-push unless user explicitly requests it.
 - Keep reminders concise and actionable.
 - If desktop notifications are unavailable, keep terminal prompts as fallback.
-

@@ -17,6 +17,22 @@ BODY_WRAP = 72
 DEFAULT_CONFIG_PATH = Path.home() / ".codex/skills/gerrit/gerrit-commit-message/config.env"
 
 
+def _extract_remote_host_and_port(origin_url: str) -> tuple[str, str | None]:
+    ssh_url = re.match(r"^ssh://(?:[^/@]+@)?([^/:]+)(?::([0-9]+))?/", origin_url)
+    if ssh_url:
+        return ssh_url.group(1).lower(), ssh_url.group(2)
+
+    scp_style = re.match(r"^(?:[^/@]+@)?([^:]+):.+$", origin_url)
+    if scp_style:
+        return scp_style.group(1).lower(), None
+
+    http_url = re.match(r"^https?://([^/]+)/", origin_url)
+    if http_url:
+        return http_url.group(1).lower(), None
+
+    return "", None
+
+
 def _read_body(body: str | None, body_file: str | None) -> str:
     if body and body_file:
         raise ValueError("Use either --body or --body-file, not both.")
@@ -82,6 +98,26 @@ def _load_config(config_path: Path) -> dict[str, str]:
     return config
 
 
+def _require_gerrit_origin() -> None:
+    try:
+        origin_url = subprocess.check_output(
+            ["git", "remote", "get-url", "origin"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        raise ValueError(
+            "Could not read remote 'origin'. This tool requires a Gerrit repository."
+        )
+    host, port = _extract_remote_host_and_port(origin_url)
+    lower_url = origin_url.lower()
+    if "gerrit" not in host and port != "29418" and "/gerrit/" not in lower_url:
+        raise ValueError(
+            f"Remote origin does not look like Gerrit: {origin_url}. "
+            "Use normal git commit flow for non-Gerrit repositories."
+        )
+
+
 def _prompt_for_jira(current_jira: str | None) -> str | None:
     if current_jira:
         prompt = f"Jira issue (HUB-1234, Enter to keep {current_jira}): "
@@ -139,7 +175,7 @@ def main() -> int:
     parser.add_argument(
         "--allow-no-jira",
         action="store_true",
-        help="Allow commit without Jira in non-interactive mode",
+        help="Deprecated: Jira is optional unless always-ask mode is enabled",
     )
     parser.add_argument(
         "--commit",
@@ -158,13 +194,9 @@ def main() -> int:
 
         jira_value = args.jira
         if args.commit:
-            if sys.stdin.isatty() and (always_ask_jira or not jira_value):
+            _require_gerrit_origin()
+            if sys.stdin.isatty() and always_ask_jira:
                 jira_value = _prompt_for_jira(jira_value)
-            elif not jira_value and not args.allow_no_jira:
-                raise ValueError(
-                    "--jira is required with --commit in non-interactive mode "
-                    "(or pass --allow-no-jira)."
-                )
 
         jira_footer = _normalize_jira(jira_value)
         message = build_message(args.subject, body, jira_footer)

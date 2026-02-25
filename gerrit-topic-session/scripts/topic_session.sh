@@ -3,6 +3,36 @@ set -euo pipefail
 
 STORE_FILE="${CODEX_GERRIT_TOPIC_STORE:-/tmp/codex-gerrit-topics-${USER}.txt}"
 
+require_gerrit_origin() {
+  local origin_url lower_url host_port host
+  if ! origin_url="$(git remote get-url origin 2>/dev/null)"; then
+    echo "Could not read remote 'origin'. This script requires a Gerrit repository." >&2
+    exit 2
+  fi
+
+  if [[ "$origin_url" =~ ^ssh://([^/@]+@)?([^/:]+)(:([0-9]+))?/ ]]; then
+    host="${BASH_REMATCH[2]}"
+    host_port="${BASH_REMATCH[4]:-}"
+  elif [[ "$origin_url" =~ ^([^/@]+@)?([^:]+):.+$ ]]; then
+    host="${BASH_REMATCH[2]}"
+    host_port=""
+  elif [[ "$origin_url" =~ ^https?://([^/]+)/ ]]; then
+    host="${BASH_REMATCH[1]}"
+    host_port=""
+  else
+    host=""
+    host_port=""
+  fi
+
+  lower_url="$(printf '%s' "$origin_url" | tr '[:upper:]' '[:lower:]')"
+  host="$(printf '%s' "$host" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$host" != *gerrit* && "$host_port" != "29418" && "$lower_url" != *"/gerrit/"* ]]; then
+    echo "Remote origin does not look like Gerrit: $origin_url" >&2
+    echo "Do not use Gerrit topic session commands in non-Gerrit repositories." >&2
+    exit 2
+  fi
+}
+
 usage() {
   cat <<USAGE
 Usage: $0 <set|add|show|clear|options> [topics...]
@@ -35,6 +65,8 @@ read_topics() {
 write_topics() {
   awk 'NF' | awk '!seen[$0]++' > "$STORE_FILE"
 }
+
+require_gerrit_origin
 
 cmd="${1:-}"
 shift || true

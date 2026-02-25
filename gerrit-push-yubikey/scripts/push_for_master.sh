@@ -22,6 +22,36 @@ for arg in "$@"; do
   esac
 done
 
+require_gerrit_origin() {
+  local origin_url lower_url host_port host
+  if ! origin_url="$(git remote get-url origin 2>/dev/null)"; then
+    echo "Could not read remote 'origin'. This script requires a Gerrit repository." >&2
+    exit 2
+  fi
+
+  if [[ "$origin_url" =~ ^ssh://([^/@]+@)?([^/:]+)(:([0-9]+))?/ ]]; then
+    host="${BASH_REMATCH[2]}"
+    host_port="${BASH_REMATCH[4]:-}"
+  elif [[ "$origin_url" =~ ^([^/@]+@)?([^:]+):.+$ ]]; then
+    host="${BASH_REMATCH[2]}"
+    host_port=""
+  elif [[ "$origin_url" =~ ^https?://([^/]+)/ ]]; then
+    host="${BASH_REMATCH[1]}"
+    host_port=""
+  else
+    host=""
+    host_port=""
+  fi
+
+  lower_url="$(printf '%s' "$origin_url" | tr '[:upper:]' '[:lower:]')"
+  host="$(printf '%s' "$host" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$host" != *gerrit* && "$host_port" != "29418" && "$lower_url" != *"/gerrit/"* ]]; then
+    echo "Remote origin does not look like Gerrit: $origin_url" >&2
+    echo "Use normal git push for non-Gerrit repositories." >&2
+    exit 2
+  fi
+}
+
 notify() {
   local title="$1"
   local msg="$2"
@@ -29,6 +59,8 @@ notify() {
     notify-send "$title" "$msg" >/dev/null 2>/dev/null || true
   fi
 }
+
+require_gerrit_origin
 
 gerrit_options="wip"
 if [[ -x "$TOPIC_SCRIPT" ]]; then
