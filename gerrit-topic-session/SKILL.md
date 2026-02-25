@@ -5,7 +5,8 @@ description: Manage session-scoped Gerrit topics and apply them during push. Use
 
 # Gerrit Topic Session
 
-Store and retrieve Gerrit topics for the current session, then include them in push refspec options.
+Store and retrieve Gerrit topics for the current Codex chat, then include them
+in push refspec options.
 
 ## Workflow
 
@@ -29,7 +30,8 @@ Store and retrieve Gerrit topics for the current session, then include them in p
 
 ## Rules
 
-- Topics are session-scoped via `/tmp` storage and are not committed.
+- Topics are chat-scoped via `/tmp` storage keyed by `CODEX_THREAD_ID` (or
+  `CODEX_GERRIT_TOPIC_SCOPE`) and are not committed.
 - Do not use this skill when `origin` is not a Gerrit remote.
 - Topic names are normalized to lowercase and must match `[a-z0-9._-]+`.
 - Keep topic names short and meaningful.

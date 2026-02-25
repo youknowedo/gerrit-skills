@@ -1,5 +1,8 @@
 # Usage
 
+Topics are stored per Codex chat (keyed by `CODEX_THREAD_ID` when available), so
+different chats do not share topic state.
+
 Set topics for this session:
 
 ```bash

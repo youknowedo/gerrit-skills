@@ -1,7 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-STORE_FILE="${CODEX_GERRIT_TOPIC_STORE:-/tmp/codex-gerrit-topics-${USER}.txt}"
+resolve_store_file() {
+  if [[ -n "${CODEX_GERRIT_TOPIC_STORE:-}" ]]; then
+    printf '%s\n' "$CODEX_GERRIT_TOPIC_STORE"
+    return
+  fi
+
+  local scope_raw scope
+  scope_raw="${CODEX_GERRIT_TOPIC_SCOPE:-${CODEX_THREAD_ID:-${CODEX_SESSION_ID:-}}}"
+  if [[ -n "$scope_raw" ]]; then
+    scope="$(printf '%s' "$scope_raw" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9._-' '-')"
+    printf '/tmp/codex-gerrit-topics-%s-%s.txt\n' "$USER" "$scope"
+    return
+  fi
+
+  printf '/tmp/codex-gerrit-topics-%s.txt\n' "$USER"
+}
+
+STORE_FILE="$(resolve_store_file)"
 
 require_gerrit_origin() {
   local origin_url lower_url host_port host
